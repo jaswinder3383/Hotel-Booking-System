@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: hotel_booking_db
+      POSTGRES_USER: jaswinder
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"  # Optional: Exposes PostgreSQL to the host for direct access if needed
+    networks:
+      - django_network
+  cache:
+    image: redis:6
+    networks:
+      - django_network
+  web:
+    build: .
+    entrypoint: ["/app/entrypoint.sh"]
+
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_DB=hotel_booking_db
+      - POSTGRES_USER=jaswinder
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST=db  # This connects to the 'db' service in Docker
+      - POSTGRES_PORT=5432
+    # command: >
+    #   sh -c "python3 manage.py makemigrations &&
+    #          python3 manage.py migrate &&
+    #          python3 manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - db
+      - cache
+    networks:
+      - django_network
+networks:
+  django_network:
+
+
+
+
+
